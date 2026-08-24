@@ -61,7 +61,24 @@ EXCEPTION
       -- Handling for unknown errors
 END;
 ```
+### **Create Table**
+```
+CREATE TABLE employees (
+    emp_id NUMBER PRIMARY KEY,
+    emp_name VARCHAR2(50),
+    designation VARCHAR2(50),
+    salary NUMBER,
+    dept_no NUMBER
+);
 
+INSERT INTO employees VALUES (101, 'Arun', 'Manager', 60000, 10);
+INSERT INTO employees VALUES (102, 'Bala', 'Developer', 45000, 20);
+INSERT INTO employees VALUES (103, 'Charan', 'Tester', 35000, 20);
+INSERT INTO employees VALUES (104, 'Dinesh', 'Developer', 50000, 30);
+INSERT INTO employees VALUES (105, 'Ezhil', 'Analyst', 40000, 10);
+
+COMMIT;
+```
 ### **Question 1: Simple Cursor with Exception Handling**
 
 **Write a PL/SQL program using a simple cursor to fetch employee names and designations from the `employees` table. Implement exception handling for the following cases:**
@@ -69,6 +86,44 @@ END;
 1. **NO_DATA_FOUND**: When no rows are fetched.
 2. **OTHERS**: Any other unexpected errors during execution.
 
+```
+DECLARE
+    CURSOR emp_cursor IS
+        SELECT emp_name, designation
+        FROM employees;
+
+    v_emp_name employees.emp_name%TYPE;
+    v_designation employees.designation%TYPE;
+    v_count NUMBER := 0;
+BEGIN
+    OPEN emp_cursor;
+
+    LOOP
+        FETCH emp_cursor INTO v_emp_name, v_designation;
+
+        EXIT WHEN emp_cursor%NOTFOUND;
+
+        v_count := v_count + 1;
+
+        DBMS_OUTPUT.PUT_LINE(
+            'Employee Name: ' || v_emp_name ||
+            ', Designation: ' || v_designation
+        );
+    END LOOP;
+
+    CLOSE emp_cursor;
+
+    IF v_count = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No employee data found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+```
 **Steps:**
 
 - Create an `employees` table with fields `emp_id`, `emp_name`, and `designation`.
@@ -78,7 +133,7 @@ END;
 
 **Output:**  
 The program should display the employee details or an error message.
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/m8/8.1.png)
 ---
 
 ### **Question 2: Parameterized Cursor with Exception Handling**
@@ -87,7 +142,40 @@ The program should display the employee details or an error message.
 
 1. **NO_DATA_FOUND**: When no employees meet the salary criteria.
 2. **OTHERS**: For any unexpected errors during the execution.
+```
+DECLARE
+    CURSOR emp_cursor(p_min_salary NUMBER, p_max_salary NUMBER) IS
+        SELECT emp_id, emp_name, designation, salary
+        FROM employees
+        WHERE salary BETWEEN p_min_salary AND p_max_salary;
 
+    v_count NUMBER := 0;
+BEGIN
+    FOR emp IN emp_cursor(40000, 55000)
+    LOOP
+        v_count := v_count + 1;
+
+        DBMS_OUTPUT.PUT_LINE(
+            'ID: ' || emp.emp_id ||
+            ', Name: ' || emp.emp_name ||
+            ', Designation: ' || emp.designation ||
+            ', Salary: ' || emp.salary
+        );
+    END LOOP;
+
+    IF v_count = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'Error: No employees found in the specified salary range.'
+        );
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+```
 **Steps:**
 
 - Modify the `employees` table by adding a `salary` column.
@@ -97,7 +185,7 @@ The program should display the employee details or an error message.
 
 **Output:**  
 The program should display the employee details within the specified salary range or an error message if no data is found.
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/m8/8.2.png)
 ---
 
 ### **Question 3: Cursor FOR Loop with Exception Handling**
@@ -106,7 +194,34 @@ The program should display the employee details within the specified salary rang
 
 1. **NO_DATA_FOUND**: If no employees are found in the database.
 2. **OTHERS**: For any other unexpected errors.
+```
+DECLARE
+    v_count NUMBER := 0;
+BEGIN
+    FOR emp IN (
+        SELECT emp_name, dept_no
+        FROM employees
+    )
+    LOOP
+        v_count := v_count + 1;
 
+        DBMS_OUTPUT.PUT_LINE(
+            'Employee Name: ' || emp.emp_name ||
+            ', Department Number: ' || emp.dept_no
+        );
+    END LOOP;
+
+    IF v_count = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No employees found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+```
 **Steps:**
 
 - Modify the `employees` table by adding a `dept_no` column.
@@ -116,7 +231,7 @@ The program should display the employee details within the specified salary rang
 
 **Output:**  
 The program should display employee names with their department numbers or the appropriate error message if no data is found.
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/m8/8.3.png)
 ---
 
 ### **Question 4: Cursor with `%ROWTYPE` and Exception Handling**
@@ -125,7 +240,45 @@ The program should display employee names with their department numbers or the a
 
 1. **NO_DATA_FOUND**: When no employees are found in the database.
 2. **OTHERS**: For any other errors that occur.
+```
+DECLARE
+    CURSOR emp_cursor IS
+        SELECT *
+        FROM employees;
 
+    emp_record emp_cursor%ROWTYPE;
+    v_count NUMBER := 0;
+BEGIN
+    OPEN emp_cursor;
+
+    LOOP
+        FETCH emp_cursor INTO emp_record;
+
+        EXIT WHEN emp_cursor%NOTFOUND;
+
+        v_count := v_count + 1;
+
+        DBMS_OUTPUT.PUT_LINE(
+            'Employee ID: ' || emp_record.emp_id ||
+            ', Name: ' || emp_record.emp_name ||
+            ', Designation: ' || emp_record.designation ||
+            ', Salary: ' || emp_record.salary
+        );
+    END LOOP;
+
+    CLOSE emp_cursor;
+
+    IF v_count = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No employee records found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+```
 **Steps:**
 
 - Modify the `employees` table by adding `emp_id`, `emp_name`, `designation`, and `salary` fields.
@@ -135,7 +288,7 @@ The program should display employee names with their department numbers or the a
 
 **Output:**  
 The program should display employee records or the appropriate error message if no data is found.
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/m8/8.4.png)
 ---
 
 ### **Question 5: Cursor with FOR UPDATE Clause and Exception Handling**
@@ -144,7 +297,49 @@ The program should display employee records or the appropriate error message if 
 
 1. **NO_DATA_FOUND**: If no rows are affected by the update.
 2. **OTHERS**: For any unexpected errors during execution.
+```
+DECLARE
+    CURSOR emp_cursor IS
+        SELECT emp_id, emp_name, salary
+        FROM employees
+        WHERE dept_no = 20
+        FOR UPDATE OF salary;
 
+    v_count NUMBER := 0;
+BEGIN
+    FOR emp IN emp_cursor
+    LOOP
+        v_count := v_count + 1;
+
+        UPDATE employees
+        SET salary = salary * 1.10
+        WHERE CURRENT OF emp_cursor;
+
+        DBMS_OUTPUT.PUT_LINE(
+            'Employee: ' || emp.emp_name ||
+            ', Old Salary: ' || emp.salary ||
+            ', New Salary: ' || (emp.salary * 1.10)
+        );
+    END LOOP;
+
+    IF v_count = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+    COMMIT;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE(
+            'Error: No employees found in the specified department.'
+        );
+        ROLLBACK;
+
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        ROLLBACK;
+END;
+```
 **Steps:**
 
 - Modify the `employees` table to include a `dept_no` and `salary` field.
@@ -154,7 +349,7 @@ The program should display employee records or the appropriate error message if 
 
 **Output:**  
 The program should update employee salaries and display a message, or it should display an error message if no data is found.
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/m8/8.5.png)
 ---
 
 ## RESULT
