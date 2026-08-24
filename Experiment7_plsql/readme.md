@@ -47,7 +47,7 @@ END;
 
 **Expected Output:**  
 Greater number is: 80
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/1.png)
 ---
 
 ## 2. Write a PL/SQL program to Calculate Sum of First N Natural Numbers
@@ -74,7 +74,7 @@ END;
 
 **Expected Output:**  
 Sum of first 10 natural numbers is: 55
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/2.png)
 ---
 
 ## 3. Write a PL/SQL program to generate Fibonacci series
@@ -111,6 +111,7 @@ END;
 **Expected Output:**  
 n = 7  
 Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/3.png)
 
 ---
 
@@ -140,6 +141,7 @@ END;
 **Expected Output:**  
 n = 1535  
 Reversed number is 5351
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/4.png)
 
 ---
 
@@ -174,6 +176,6 @@ END;
 **Expected Output:**  
 a = 10, b = 9, c = 15  
 Largest of three number is 15
-
+![image](https://github.com/Karuppasamy-777/19CS404-DBMS-Lab-Manual/blob/main/5.png)
 ## RESULT
 Thus, the PL/SQL programs using variables, conditionals, and loops were executed successfully.
